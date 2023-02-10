@@ -4,16 +4,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Slide {
-    int lowPos = 2000;
-    int[] stackPos = {0,0,0,0,800};
-    int medPos = 3140;
-    int highPos = 4500;
+    int lowPos = 1300;
+    int[] stackPos = {0,0,150,300,400};
+    int medPos = 2092;
+    int highPos = 3000;
     double openPos = -0.25;
-    public double slidePower = 0.8;
+    public double slidePower = 1;
     double intakePower = 0.5;
-    double turretPower = 0.4;
+    public double turretPower = 0.6;
     float offset = 20;
-    public enum height{ground,low, med, high, stack5};
+    public enum height{ground,low, med, high, stack3, stack4, stack5};
     ElapsedTime t;
     SpinMotor slideL;
     SpinMotor slideR;
@@ -22,11 +22,12 @@ public class Slide {
     SpinCrServo open;
     SpinMotor turret;
     TouchSensorModule touchSensor;
+    LinearOpMode opMode;
     public height currentHight = height.ground;
     public Slide(String slidel, String slider,String wheell, String wheelr,String opens, String Turret, String _touchSensor, LinearOpMode op){
         slideL = new SpinMotor(slidel,true,op);
         slideR = new SpinMotor(slider,true,op);
-        slideR.reverse();
+        slideL.reverse();
         wheelL = new SpinCrServo(wheell,op);
         wheelR = new SpinCrServo(wheelr,op);
         touchSensor = new TouchSensorModule(_touchSensor, op);
@@ -34,13 +35,14 @@ public class Slide {
         open = new SpinCrServo(opens,op);
         t = new ElapsedTime();
         t.reset();
+        opMode = op;
     }
     public void goToPos(height pos) {
         currentHight = pos;
         switch (pos) {
             case ground:
-                slideR.spinToPosition(slidePower,0);
-                slideL.spinToPosition(slidePower,0);
+                slideR.spinToPosition(slidePower,-10);
+                slideL.spinToPosition(slidePower,-10);
                 break;
             case low:
                 slideR.spinToPosition(slidePower,lowPos);
@@ -53,6 +55,13 @@ public class Slide {
             case high:
                 slideR.spinToPosition(slidePower,highPos);
                 slideL.spinToPosition(slidePower,highPos);
+                break;
+            case stack3:
+                slideR.spinToPosition(slidePower, stackPos[2]);
+                slideL.spinToPosition(slidePower, stackPos[2]);
+            case stack4:
+                slideR.spinToPosition(slidePower, stackPos[3]);
+                slideL.spinToPosition(slidePower, stackPos[3]);
                 break;
             case stack5:
                 slideR.spinToPosition(slidePower, stackPos[4]);
@@ -87,7 +96,7 @@ public class Slide {
     public void intakeForTime(double time){
         t.reset();
         startIntake();
-        while (t.seconds() < time){
+        while (t.seconds() < time && opMode.opModeIsActive()){
 
         }
         stopIntake();
@@ -108,7 +117,7 @@ public class Slide {
         }
         close();
     }
-    int getValueForHeight(height pos){
+    public int getValueForHeight(height pos){
         switch (pos){
             case ground:
                 return 0;
@@ -130,10 +139,20 @@ public class Slide {
     public void resetTurret(){
         turret.spinToPosition(turretPower, 0);
     }
+    public void resetTurretWait(){
+        resetTurret();
+        while(turret.isBusy() && opMode.opModeIsActive()){
+            //do nothing :)
+        }
+    }
     public void spinTurretWait(double power, int position){
         turret.spinToPosition(power, position);
-        while(turret.isBusy()){
+        opMode.telemetry.addData("turret", turret.getPosition());
+        opMode.telemetry.update();
+        while(turret.isBusy() && opMode.opModeIsActive()){
             //do nothing :)
+            opMode.telemetry.addData("turret", turret.getPosition());
+            opMode.telemetry.update();
         }
     }
     public void spinTurret(double power, int position){
@@ -142,8 +161,18 @@ public class Slide {
     public void spinTurret(double power){
         turret.startSpin(power);
     }
-    public int getSlidePosiion(){
+    public int getSlidePosition(){
         return (Math.abs(slideL.getPosition()) + Math.abs(slideR.getPosition()))/2;
+    }
+    public int getSlidePosition(int slide){
+        switch (slide){
+            default:
+                return (Math.abs(slideL.getPosition()) + Math.abs(slideR.getPosition()))/2;
+            case 0:
+                return slideL.getPosition();
+            case 1:
+                return slideR.getPosition();
+        }
     }
     public boolean touchSensorPressed(){
         return touchSensor.getState();
@@ -161,5 +190,18 @@ public class Slide {
     }
     public int getTurretPosition(){
         return turret.getPosition();
+    }
+    public boolean isTurretBusy(){
+        return turret.isBusy();
+    }
+    public void gotoOther(int position){
+        slideL.spinToPosition(slidePower, position);
+        slideR.spinToPosition(slidePower, position);
+    }
+    public int getTargetPosition(){
+        return Math.abs(slideL.getMotor().getTargetPosition()) + Math.abs(slideR.getMotor().getTargetPosition());
+    }
+    public void resetTurretEncoder(){
+        turret.resetEncoder();
     }
 }

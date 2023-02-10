@@ -12,26 +12,24 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 public class IMU {
 
-    public BNO055IMU imuBN;
     public BHI260IMU imuBH;
     Orientation lastAngles = new Orientation();
     double globalAngle;
     LinearOpMode op;
-    int imuType = 1;
     /**************************************
      * Initialization and Basic Heading Functions
      **************************************/
     public IMU(LinearOpMode opmode) {
         op = opmode;
 
-        imuBN = op.hardwareMap.tryGet(BNO055IMU.class, "imu");
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.mode = BNO055IMU.SensorMode.IMU;
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        imuBH = op.hardwareMap.tryGet(BHI260IMU.class, "imu");
+        BHI260IMU.Prameters parameters = new BHI260IMU.Parameters();
+        parameters.mode = BHI260IMU.SensorMode.IMU;
+        parameters.angleUnit = BHI260IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BHI260IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.loggingEnabled = false;
 
-        imuBN.initialize(parameters);
+        imuBH.initialize(parameters);
 
 
         // make sure the imu gyro is calibrated before continuing.

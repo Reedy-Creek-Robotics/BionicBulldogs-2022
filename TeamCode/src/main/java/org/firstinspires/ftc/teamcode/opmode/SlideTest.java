@@ -54,6 +54,8 @@ public class SlideTest extends LinearOpMode {
             telemetry.addData("left",slideL.getPosition());
             telemetry.addData("right",slideR.getPosition());
             telemetry.addData("avg", (Math.abs(slideR.getPosition()) + Math.abs(slideL.getPosition())/2));
+            telemetry.addData("leftSlide", slide.getSlidePosition(0));
+            telemetry.addData("rightSlide", slide.getSlidePosition(1));
             telemetry.addData("turret", slide.getTurretPosition());
             telemetry.addData("pos", height);
             telemetry.update();

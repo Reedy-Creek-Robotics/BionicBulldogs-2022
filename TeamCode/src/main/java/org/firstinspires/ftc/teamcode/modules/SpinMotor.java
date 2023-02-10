@@ -57,11 +57,7 @@ public class SpinMotor {
 
     public void spinToPosition(double speed, int position, boolean stopPowering){
         if(hasMotor) {
-            if(reversed) {
-                motor.setTargetPosition(position);
-            }else{
-                motor.setTargetPosition(-position);
-            }
+            motor.setTargetPosition(position);
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             motor.setPower(speed);
         }
@@ -93,8 +89,8 @@ public class SpinMotor {
             reversed = true;
         }
     }
-    public void resetEncoder(){
-        if(hasMotor) {
+    public void resetEncoder() {
+        if (hasMotor) {
             motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }

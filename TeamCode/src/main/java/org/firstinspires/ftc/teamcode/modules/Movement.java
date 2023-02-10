@@ -13,6 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 
 import java.io.Console;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.logging.ConsoleHandler;
 
 public class Movement {
@@ -20,18 +22,19 @@ public class Movement {
     //wheel size is 100mm and circumference ~31.415 cm(regular)
     //wheel size is 96mm and circumference~30.15 cm(Strafer chassis)
     public static double TICKS_PER_CM = 17.83; // 17.83 tics/cm traveled(Strafer)
-    public static double MOVE_CORRECTION = 1.0;
-    public static double ROTATION_CORRECTION = 1.0; //(62/90);
-    public static double STRAFE_CORRECTION = 1.13;
+    public static double MOVE_CORRECTION = 0.955;
+    public static double ROTATION_CORRECTION = 0.88; //(62/90);
+    public static double STRAFE_CORRECTION = 1.1;
     public static double TURN_CONSTANT = 50.5d/90d; // distance per deg
+    double slowdownOffset = 0.2;
     DcMotor frontLeft,backLeft,frontRight,backRight;
     LinearOpMode opMode;
     Telemetry telemetry;
     DistanceSensorModule distanceSensor;
     IMU imu;
     boolean useImu = false;
-    double speed = .50; // default speed is always 50%
-
+    double speed = .5;// default speed is always 50%
+    Slide slide;
 
     public Movement(String fl, String fr, String bl, String br, LinearOpMode op, boolean _useImu){
         opMode = op;
@@ -66,6 +69,11 @@ public class Movement {
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+    public void setSettings(double movea, double strafe, double rotate){
+        MOVE_CORRECTION = movea;
+        STRAFE_CORRECTION = strafe;
+        ROTATION_CORRECTION = rotate;
+    }
     public void reverse(){
         backLeft.setDirection(DcMotorSimple.Direction.FORWARD);
         frontLeft.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -93,6 +101,9 @@ public class Movement {
     public double getAngle(){
         return getAngle(AngleUnit.RADIANS);
     }
+    public void addSlide(Slide _slide){
+        slide = _slide;
+    }
 
     public void telOpRunMode(){
         frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -111,7 +122,7 @@ public class Movement {
         double output_xRight = Math.pow(-opMode.gamepad1.right_stick_x, 3);
         double drive = -output_y * wheelsPowerFactor;//vertical movement = the left stick on controller one(moving on the y-axis)
         double strafe = output_x * wheelsPowerFactor;//Strafing = the left stick on controller 1(moving on the x-axis)
-        double rotate = -output_xRight * (wheelsPowerFactor/2);
+        double rotate = -output_xRight * (wheelsPowerFactor/0.5);
         double field_drive = -(drive * Math.cos(angle) - strafe * Math.sin(angle));
         double field_strafe = -(drive * Math.sin(angle) + strafe * Math.cos(angle));
         if(fieldRelative) {
@@ -282,19 +293,33 @@ public class Movement {
         frontRight.setPower(speed);
         backRight.setPower(speed);
 
-        while (opMode.opModeIsActive() && (backRight.isBusy() || backLeft.isBusy() || frontLeft.isBusy() || frontRight.isBusy())){
-            //just waiting
+        while (!opMode.isStopRequested() && (backRight.isBusy() && backLeft.isBusy() && frontLeft.isBusy() && frontRight.isBusy())){
+            double fl = frontLeft.getCurrentPosition() / frontLeft.getTargetPosition() == 0 ? frontLeft.getCurrentPosition() : frontLeft.getTargetPosition();
+            double fr = frontRight.getCurrentPosition() / frontRight.getTargetPosition() == 0 ? frontRight.getCurrentPosition() : frontRight.getTargetPosition();
+            double bl = backLeft.getCurrentPosition() / backLeft.getTargetPosition() == 0 ? backLeft.getCurrentPosition() : backLeft.getTargetPosition();
+            double br = backRight.getCurrentPosition() / backRight.getTargetPosition() == 0 ? backRight.getCurrentPosition() : backRight.getTargetPosition();
+            double a = (fl+fr+bl+br)/4;
+            double newSpeed = ((a > 0.5 + slowdownOffset / 2) ? (-2 * a + 2 + slowdownOffset / 2) : 1) * speed;
+            frontLeft.setPower(speed);
+            backLeft.setPower(speed);
+            frontRight.setPower(speed);
+            backRight.setPower(speed);
+            telemetry.addData("power", newSpeed);
+            telemetry.addData("a", a);
+            telemetry.addData("fl", fl);
+            telemetry.addData("fr", fr);
+            telemetry.addData("bl", bl);
+            telemetry.addData("br", br);
+            telemetry.update();
         }
-
+        delay(0.25);
         frontLeft.setPower(0);
         backLeft.setPower(0);
         frontRight.setPower(0);
         backRight.setPower(0);
-        delay(0.25);
 
     }
     public void telemetryUpdate(){
-        //TELEMETRY OUTPUT TO THE PHONE
         telemetry.addData("encoder-bck-left", backLeft.getCurrentPosition() + " power= " + backLeft.getPower() +  "  busy=" + backLeft.isBusy());
         telemetry.addData("encoder-bck-right", backRight.getCurrentPosition() + " power= " + backRight.getPower() +  "  busy=" + backRight.isBusy());
         telemetry.addData("encoder-fwd-left", frontLeft.getCurrentPosition() + " power= " + frontLeft.getPower() +  "  busy=" +frontLeft.isBusy());
@@ -309,7 +334,14 @@ public class Movement {
     public void delay(double time){
         ElapsedTime t = new ElapsedTime();
         t.reset();
-        while(t.seconds() < time);
+        while(t.seconds() < time && opMode.opModeIsActive());
+    }
+    public void delayUpdateMovement(double time){
+        ElapsedTime t = new ElapsedTime();
+        t.reset();
+        while(t.seconds() < time && opMode.opModeIsActive()){
+            mecanumTeleOpUpdate(0.8, false);
+        }
     }
     public void move(double forward, double _strafe, double _rotate){
         //THESE ARE THE MOVEMENT FUNCTIONS
@@ -343,9 +375,9 @@ public class Movement {
         backRight.setTargetPosition((int) (forward * TICKS_PER_CM * MOVE_CORRECTION + backRight.getTargetPosition()));
         //strafe
         backLeft.setTargetPosition((int) (-strafe * TICKS_PER_CM * STRAFE_CORRECTION + backLeft.getTargetPosition()));
-        frontLeft.setTargetPosition((int) (speed * TICKS_PER_CM * STRAFE_CORRECTION + frontLeft.getTargetPosition()));
+        frontLeft.setTargetPosition((int) (strafe * TICKS_PER_CM * STRAFE_CORRECTION + frontLeft.getTargetPosition()));
         frontRight.setTargetPosition((int) (-strafe * TICKS_PER_CM * STRAFE_CORRECTION + frontRight.getTargetPosition()));
-        backRight.setTargetPosition((int) (speed * TICKS_PER_CM * STRAFE_CORRECTION + backRight.getTargetPosition()));
+        backRight.setTargetPosition((int) (strafe * TICKS_PER_CM * STRAFE_CORRECTION + backRight.getTargetPosition()));
         //move
         move();
     }
