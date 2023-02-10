@@ -12,7 +12,7 @@ public class ProgBotTeleop extends LinearOpMode {
         boolean fieldRelative = true;
         waitForStart();
         while (opModeIsActive()){
-            movement.mecanumTeleOpUpdate(0.7,fieldRelative);
+            movement.mecanumTeleOpUpdate(0.95,fieldRelative);
             if(gamepad1.back){
                 fieldRelative = !fieldRelative;
             }

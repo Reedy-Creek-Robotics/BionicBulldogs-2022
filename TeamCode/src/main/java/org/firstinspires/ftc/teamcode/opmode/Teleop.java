@@ -1,54 +1,89 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.exception.RobotCoreException;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.modules.Movement;
 import org.firstinspires.ftc.teamcode.modules.Slide;
 @TeleOp(name = "MainTelop")
 public class Teleop extends LinearOpMode {
+    double baseSpeed = 0.85;
+    double medSpeed = 0.5;
+    double highSpeed = 0.3;
+
+    double btnDelay = 0;
+
+    boolean sensorState = false;
     enum SlideMode{
-        auto, manual;
+        auto, manual
     }
     enum IntakeState{
-        intake, stop, outtake;
+        intake, stop
     }
+    Movement movement;
     public void runOpMode(){
-        Movement movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, false);
+        telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
+
+        Gamepad curGamepad = new Gamepad();
+        Gamepad prevGamepad = new Gamepad();
+
+        movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, false);
         Slide slide = new Slide("slideL", "slideR", "leftWheel", "rightWheel", "open", "turret", "touchSensor", this);
         movement.telOpRunMode();
         SlideMode slideMode = SlideMode.auto;
-        boolean closed = true;
+        boolean closed = false;
+        boolean holdPosition = false;
         ElapsedTime t = new ElapsedTime();
         t.reset();
         IntakeState intakeState = IntakeState.stop;
         waitForStart();
         while (opModeIsActive()) {
-            movement.mecanumTeleOpUpdate(slide.getSlidePosiion() > 4000 ? 0.4 : (slide.getSlidePosiion() > 3000 ? 0.6 : 0.8),false);
+            try {
+                prevGamepad.copy(curGamepad);
+                curGamepad.copy(gamepad1);
+            }catch(RobotCoreException e){
+                telemetry.addLine("robot core excption :(");
+            }
+            double powerFactor = slide.getSlidePosition() > 2700 ? highSpeed : (
+                    slide.getSlidePosition() > 1900 ? medSpeed :
+                            baseSpeed);
+            movement.mecanumTeleOpUpdate(powerFactor,false);
             if (slideMode == SlideMode.auto) {
-                if (gamepad1.dpad_down) {
+                if (curGamepad.dpad_down) {
                     slide.goToPos(Slide.height.ground);
                 }
-                if (gamepad1.dpad_left) {
+                if (curGamepad.dpad_left) {
                     slide.goToPos(Slide.height.low);
                 }
-                if (gamepad1.dpad_up) {
+                if (curGamepad.dpad_up) {
                     slide.goToPos(Slide.height.med);
                 }
-                if (gamepad1.dpad_right) {
+                if (curGamepad.dpad_right) {
                     slide.goToPos(Slide.height.high);
                 }
             } else {
-                if (gamepad1.dpad_up) {
+                if (curGamepad.dpad_up) {
                     slide.setSlidePower(slide.slidePower);
-                } else if (gamepad1.dpad_down) {
+                    holdPosition = true;
+                } else if (curGamepad.dpad_down) {
                     slide.setSlidePower(-slide.slidePower);
+                    holdPosition = true;
                 } else {
-                    slide.setSlidePower(0);
+                    if(holdPosition){
+                        slide.gotoOther(slide.getSlidePosition());
+                        holdPosition = false;
+                    }
+                }
+                if(curGamepad.dpad_left){
+                    slide.resetSlideEncoders();
                 }
             }
-            if (gamepad1.x && t.seconds() >= 0.5) {
+            if (curGamepad.x && /*t.seconds() >= btnDelay && */!prevGamepad.x) {
                 if (closed) {
                     slide.open();
                     closed = false;
@@ -58,38 +93,43 @@ public class Teleop extends LinearOpMode {
                 }
                 t.reset();
             }
-            if (gamepad1.left_bumper) {
+            if (curGamepad.left_bumper) {
                 //if (slide.getSlidePosiion() > 400) {
-                    slide.spinTurret(-0.4);
+                    slide.spinTurret(-0.7);
                 //}
-            } else if (gamepad1.right_bumper) {
+            } else if (curGamepad.right_bumper) {
                 //if (slide.getSlidePosiion() > 400) {
-                    slide.spinTurret(0.4);
+                    slide.spinTurret(0.7);
                 //}
-            } else {
+            } else if(!slide.isTurretBusy()) {
                 slide.spinTurret(0);
             }
-            if(gamepad1.b){
+            if(curGamepad.b && /*t.seconds() > btnDelay && */!prevGamepad.b){
                 switch (intakeState){
+                    case intake:
+                        slide.stopIntake();
+                        intakeState = IntakeState.stop;
+                        break;
+                    default:
                     case stop:
-                    case outtake:
                         slide.startIntake();
-                        break;
-                    case intake:
-                        slide.stopIntake();
+                        intakeState = IntakeState.intake;
                         break;
                 }
+                t.reset();
             }
-            if(gamepad1.a){
-                switch (intakeState){
-                    case stop:
-                    case intake:
-                        slide.startOutake();
-                    case outtake:
-                        slide.stopIntake();
-                }
+            if(curGamepad.a){
+                slide.gotoOther(slide.getSlidePosition()-200);
+                movement.delay(0.25);
+                slide.open();
+                movement.delay(0.25);
+                slide.gotoOther(slide.getSlidePosition()+200);
+                movement.delay(0.25);
+                slide.spinTurretWait(0.6,-30);
+                slide.goToPos(Slide.height.ground);
+                //slide.resetTurretEncoder();
             }
-            if(gamepad1.back && t.seconds() >= 0.5){
+            if(curGamepad.back && t.seconds() >= btnDelay && !prevGamepad.back){
                 if(slideMode == SlideMode.auto) {
                     slideMode = SlideMode.manual;
                 }else{
@@ -97,14 +137,29 @@ public class Teleop extends LinearOpMode {
                 }
                 t.reset();
             }
-            if (slide.touchSensorPressed()) {
+            if (slide.touchSensorPressed() && !sensorState && !(slide.getSlidePosition() > 250)) {
                 slide.stopIntake();
+                movement.delayUpdateMovement(0.1);
+                slide.gotoOther(200);
+                intakeState = IntakeState.stop;
             }
             if(slide.atPosition(Slide.height.ground) && !slide.isBusy()){
                 slide.resetSlideEncoders();
             }
+            if(curGamepad.y){
+                slide.gotoOther(100);
+            }
+            if(curGamepad.left_trigger > 0.5 && t.seconds() >= btnDelay){
+                slide.spinTurret(0.6, -550);
+            }
+            if(curGamepad.right_trigger > 0.5 && t.seconds() >= btnDelay){
+                slide.spinTurret(0.6, 550);
+            }
+            sensorState = slide.touchSensorPressed();
             telemetry.addData("slideMode", slideMode);
-            telemetry.addData("slideHeight", slide.getSlidePosiion());
+            telemetry.addData("slideHeight", slide.getSlidePosition());
+            telemetry.addData("slideHeightLeft", slide.getSlidePosition(0));
+            telemetry.addData("slideHeightRight", slide.getSlidePosition(1));
             telemetry.update();
         }
     }

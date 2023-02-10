@@ -1,27 +1,29 @@
 package org.firstinspires.ftc.teamcode.opmode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.modules.Movement;
-import org.firstinspires.ftc.teamcode.modules.Recoginition;
 import org.firstinspires.ftc.teamcode.modules.Slide;
 @Autonomous(name = "BlueTerm")
-public class AutoRightSideCenterPole extends AutoBase {
+public class BlueTerm extends AutoBase {
     public void move(){
         slide.close();
-        movement.strafeLeft(61);
-        movement.moveStraight(102);
+        movement.setSpeed(0.5);
+        movement.strafeLeft(52);
+        movement.moveStraight(97);
         telemetry.addLine("slide");
         telemetry.update();
+        movement.strafeLeft(10);
         slide.goToPos(Slide.height.high);
         telemetry.addLine("turret");
         telemetry.update();
         movement.delay(1.25);
-        slide.spinTurretWait(0.4, 550);
-        movement.strafeLeft(10);
+        slide.spinTurretWait(0.4, -550);
         movement.delay(2);
+        slide.gotoOther(slide.getValueForHeight(Slide.height.high)-500);
+        movement.delay(1);
         slide.open();
+        movement.delay(0.25);
+        slide.goToPos(Slide.height.high);
         //movement.delay(1);
         movement.strafeRight(10);
         slide.spinTurretWait(0.4, 0);
