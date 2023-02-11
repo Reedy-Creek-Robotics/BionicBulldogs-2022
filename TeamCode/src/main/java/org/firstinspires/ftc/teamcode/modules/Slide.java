@@ -11,7 +11,6 @@ public class Slide {
     double openPos = -0.25;
     public double slidePower = 1;
     double intakePower = 1;
-    public double turretPower = 0.3;
     float offset = 20;
     public enum height{ground,low, med, high, stack3, stack4, stack5};
     ElapsedTime t;
@@ -20,18 +19,16 @@ public class Slide {
     SpinCrServo wheelL;
     SpinCrServo wheelR;
     SpinCrServo open;
-    SpinMotor turret;
     TouchSensorModule touchSensor;
     LinearOpMode opMode;
     public height currentHight = height.ground;
-    public Slide(String slidel, String slider,String wheell, String wheelr,String opens, String Turret, String _touchSensor, LinearOpMode op){
+    public Slide(String slidel, String slider,String wheell, String wheelr,String opens, String _touchSensor, LinearOpMode op){
         slideL = new SpinMotor(slidel,true,op);
         slideR = new SpinMotor(slider,true,op);
         slideL.reverse();
         wheelL = new SpinCrServo(wheell,op);
         wheelR = new SpinCrServo(wheelr,op);
         touchSensor = new TouchSensorModule(_touchSensor, op);
-        turret = new SpinMotor(Turret, true, op);
         open = new SpinCrServo(opens,op);
         t = new ElapsedTime();
         t.reset();
