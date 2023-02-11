@@ -39,6 +39,8 @@ public abstract class AutoBase extends LinearOpMode {
             slide.close();
             move();
             if (resetRobot) {
+                telemetry.addLine("resetSlides");
+                telemetry.update();
                 slide.goToPosWait(Slide.height.ground);
             }
         }

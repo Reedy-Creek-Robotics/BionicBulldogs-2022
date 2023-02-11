@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import org.firstinspires.ftc.teamcode.modules.Slide;
 
 @Autonomous(name = "test auto")
+@Disabled
 public class TestAuto extends AutoBase {
     public void move() {
         resetRobot = false;

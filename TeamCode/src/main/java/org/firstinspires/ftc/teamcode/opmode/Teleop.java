@@ -32,7 +32,7 @@ public class Teleop extends LinearOpMode {
         Gamepad curGamepad = new Gamepad();
         Gamepad prevGamepad = new Gamepad();
 
-        movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, false);
+        movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, true);
         Slide slide = new Slide("slideL", "slideR", "leftWheel", "rightWheel", "open", "turret", "touchSensor", this);
         movement.telOpRunMode();
         SlideMode slideMode = SlideMode.auto;
@@ -125,7 +125,8 @@ public class Teleop extends LinearOpMode {
                 movement.delay(0.25);
                 slide.gotoOther(slide.getSlidePosition()+200);
                 movement.delay(0.25);
-                slide.spinTurretWait(0.6,-30);
+                slide.spinTurretWait(0.6,0);
+                slide.resetTurretEncoder();
                 slide.goToPos(Slide.height.ground);
                 //slide.resetTurretEncoder();
             }
@@ -147,16 +148,20 @@ public class Teleop extends LinearOpMode {
                 slide.resetSlideEncoders();
             }
             if(curGamepad.y){
-                slide.gotoOther(100);
+                slide.stopIntake();
+                movement.delayUpdateMovement(0.1);
+                slide.gotoOther(200);
+                intakeState = IntakeState.stop;
             }
             if(curGamepad.left_trigger > 0.5 && t.seconds() >= btnDelay){
-                slide.spinTurret(0.6, -550);
+                slide.spinTurret(slide.turretPower, -400);
             }
             if(curGamepad.right_trigger > 0.5 && t.seconds() >= btnDelay){
-                slide.spinTurret(0.6, 550);
+                slide.spinTurret(slide.turretPower, 400);
             }
             sensorState = slide.touchSensorPressed();
             telemetry.addData("slideMode", slideMode);
+            telemetry.addData("turretPosition", slide.getTurretPosition());
             telemetry.addData("slideHeight", slide.getSlidePosition());
             telemetry.addData("slideHeightLeft", slide.getSlidePosition(0));
             telemetry.addData("slideHeightRight", slide.getSlidePosition(1));

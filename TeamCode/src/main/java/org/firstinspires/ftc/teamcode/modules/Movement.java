@@ -94,7 +94,7 @@ public class Movement {
 
     public double getAngle(AngleUnit angleUnit){
         if(useImu) {
-            return imu.getHeading(angleUnit);
+            //return imu.getHeading(angleUnit);
         }
         return 0;
     }
@@ -294,22 +294,11 @@ public class Movement {
         backRight.setPower(speed);
 
         while (!opMode.isStopRequested() && (backRight.isBusy() && backLeft.isBusy() && frontLeft.isBusy() && frontRight.isBusy())){
-            double fl = frontLeft.getCurrentPosition() / frontLeft.getTargetPosition() == 0 ? frontLeft.getCurrentPosition() : frontLeft.getTargetPosition();
-            double fr = frontRight.getCurrentPosition() / frontRight.getTargetPosition() == 0 ? frontRight.getCurrentPosition() : frontRight.getTargetPosition();
-            double bl = backLeft.getCurrentPosition() / backLeft.getTargetPosition() == 0 ? backLeft.getCurrentPosition() : backLeft.getTargetPosition();
-            double br = backRight.getCurrentPosition() / backRight.getTargetPosition() == 0 ? backRight.getCurrentPosition() : backRight.getTargetPosition();
-            double a = (fl+fr+bl+br)/4;
-            double newSpeed = ((a > 0.5 + slowdownOffset / 2) ? (-2 * a + 2 + slowdownOffset / 2) : 1) * speed;
-            frontLeft.setPower(speed);
-            backLeft.setPower(speed);
-            frontRight.setPower(speed);
-            backRight.setPower(speed);
-            telemetry.addData("power", newSpeed);
-            telemetry.addData("a", a);
-            telemetry.addData("fl", fl);
-            telemetry.addData("fr", fr);
-            telemetry.addData("bl", bl);
-            telemetry.addData("br", br);
+            //do nothing :/
+            telemetry.addData("fl", backLeft.getCurrentPosition());
+            telemetry.addData("fr", backLeft.getCurrentPosition());
+            telemetry.addData("bl", backLeft.getCurrentPosition());
+            telemetry.addData("br", backLeft.getCurrentPosition());
             telemetry.update();
         }
         delay(0.25);
@@ -347,7 +336,7 @@ public class Movement {
         //THESE ARE THE MOVEMENT FUNCTIONS
         double angle = 0;
         if(useImu) {
-            angle = imu.getHeading(AngleUnit.RADIANS);
+            //angle = imu.getHeading(AngleUnit.RADIANS);
         }
         double output_x = Math.pow(forward, 3);
         double output_y = Math.pow(_strafe, 3);

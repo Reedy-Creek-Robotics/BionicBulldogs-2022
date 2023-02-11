@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.opmode.auto;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.modules.Slide;
 
 @Autonomous(name = "RedTermStack")
+@Disabled
 public class RedTermStack extends AutoBase {
     public void move(){
         slide.close();

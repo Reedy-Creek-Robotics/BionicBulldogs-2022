@@ -10,8 +10,8 @@ public class Slide {
     int highPos = 3000;
     double openPos = -0.25;
     public double slidePower = 1;
-    double intakePower = 0.5;
-    public double turretPower = 0.6;
+    double intakePower = 1;
+    public double turretPower = 0.3;
     float offset = 20;
     public enum height{ground,low, med, high, stack3, stack4, stack5};
     ElapsedTime t;
