@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.modules;
 
-import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -22,7 +21,7 @@ public class IMU {
     public IMU(LinearOpMode opmode) {
         op = opmode;
 
-        imu = op.hardwareMap.tryGet(BNO055IMU.class, "imu");
+        imu = op.hardwareMap.tryGet(BNO055IMU.class, "imue");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.mode = BNO055IMU.SensorMode.IMU;
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
