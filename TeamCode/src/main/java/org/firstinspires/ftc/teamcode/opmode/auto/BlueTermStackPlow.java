@@ -11,26 +11,26 @@ public class BlueTermStackPlow extends AutoBase {
     public void move(){
         //movement.setSpeed(1);
         resetRobot = false;
-        slide.close();
+        intake.close();
         //movement.strafeRight(10);
         movement.moveStraight(160);
         //score cone
         slide.goToPos(Slide.height.high);
         movement.strafeLeft(10.5);
-        slide.spinTurret(slide.turretPower, -550);
+        turret.spinTurret(turret.turretPower, -550);
         movement.delay(0.5);
         movement.moveStraight(3);
         telemetry.addLine("turret");
         telemetry.update();
         //movement.delay(0.5);
-        slide.spinTurretWait(slide.turretPower, -550);
+        turret.spinTurretWait(turret.turretPower, -550);
         movement.delay(0.25);
         slide.gotoOther(slide.getValueForHeight(Slide.height.high) - 500);
         movement.delay(0.25);
-        slide.open();
+        intake.open();
         slide.goToPos(Slide.height.high);
         movement.delay(0.25);
-        slide.spinTurretWait(slide.turretPower, 0);
+        turret.spinTurretWait(turret.turretPower, 0);
         slide.goToPos(Slide.height.low);
 
         //park

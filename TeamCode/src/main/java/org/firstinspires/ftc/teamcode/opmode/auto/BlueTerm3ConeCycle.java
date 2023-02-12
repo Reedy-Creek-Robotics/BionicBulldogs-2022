@@ -18,13 +18,13 @@ public class BlueTerm3ConeCycle extends AutoBase{
         telemetry.addLine("turret");
         telemetry.update();
         movement.delay(0.45);
-        slide.spinTurretWait(slide.turretPower, -400);
+        turret.spinTurretWait(turret.turretPower, -400);
         movement.delay(0.3);
         slide.gotoOther(slide.getValueForHeight(Slide.height.med) - 300);
         movement.delay(0.2);
-        slide.open();
+        intake.open();
         movement.strafeRight(11);
-        slide.spinTurretWait(slide.turretPower, 0);
+        turret.spinTurretWait(turret.turretPower, 0);
         slide.goToPos(Slide.height.stack5);
         movement.setSpeed(0.6);
 
@@ -36,22 +36,22 @@ public class BlueTerm3ConeCycle extends AutoBase{
             if(i != 0) {
                 movement.moveStraight(33.5);
             }
-            slide.close();
-            slide.intakeForTime(0.5);
+            intake.close();
+            intake.intakeForTime(0.5);
             slide.goToPos(Slide.height.low);
             movement.delay(0.1);
             movement.moveStraight(-33.5);
 
             //score cone 1
 
-            slide.spinTurretWait(slide.turretPower, 400);
+            turret.spinTurretWait(turret.turretPower, 400);
             movement.strafeRight(8);
             slide.gotoOther(slide.getValueForHeight(Slide.height.low) - 200);
             movement.delay(0.1);
-            slide.open();
+            intake.open();
             movement.delay(0.1);
             movement.strafeLeft(8);
-            slide.spinTurretWait(slide.turretPower, 0);
+            turret.spinTurretWait(turret.turretPower, 0);
             slide.goToPos(
                     i == 0 ? Slide.height.stack5 : (
                     i == 1 ? Slide.height.stack4 :

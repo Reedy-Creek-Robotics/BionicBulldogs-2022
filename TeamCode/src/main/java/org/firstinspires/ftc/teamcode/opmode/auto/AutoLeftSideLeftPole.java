@@ -16,7 +16,7 @@ public class AutoLeftSideLeftPole extends AutoBase {
         movement.strafeRight(96.5);
         //movement.moveStraight(15.24);
         slide.goToPos(Slide.height.high);
-        slide.open();
+        intake.open();
         movement.delay(1);
         switch (cone){
             case 1:
@@ -30,7 +30,7 @@ public class AutoLeftSideLeftPole extends AutoBase {
                 break;
         }
 
-        slide.close();
+        intake.close();
         slide.goToPos(Slide.height.ground);
     }
 }

@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.opmode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.modules.Movement;
+@Disabled
 @TeleOp(name = "progBotTelop")
 public class ProgBotTeleop extends LinearOpMode {
     public void runOpMode(){

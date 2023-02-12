@@ -6,7 +6,7 @@ import org.firstinspires.ftc.teamcode.modules.Slide;
 @Autonomous(name = "RedTerm")
 public class RedTerm extends AutoBase {
     public void move(){
-        slide.close();
+        intake.close();
         movement.setSpeed(0.5);
         movement.strafeRight(70);
         movement.moveStraight(102);
@@ -17,16 +17,16 @@ public class RedTerm extends AutoBase {
         telemetry.addLine("turret");
         telemetry.update();
         movement.delay(1.25);
-        slide.spinTurretWait(0.4, 550);
+        turret.spinTurretWait(0.4, 550);
         movement.delay(2);
         slide.gotoOther(slide.getValueForHeight(Slide.height.high)-500);
         movement.delay(1);
-        slide.open();
+        intake.open();
         movement.delay(0.25);
         slide.goToPos(Slide.height.high);
         //movement.delay(1);
         movement.strafeLeft(10);
-        slide.spinTurretWait(0.4, 0);
+        turret.spinTurretWait(0.4, 0);
         slide.goToPosWait(Slide.height.ground);
         //slide.close();
         //slide.goToPos(Slide.height.ground);//move turret to -560
@@ -48,6 +48,6 @@ public class RedTerm extends AutoBase {
 //        if(cone == 1){
 //            movement.moveStraight(51);
 //        }
-        slide.close();
+        intake.close();
     }
 }

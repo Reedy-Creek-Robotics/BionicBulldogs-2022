@@ -8,8 +8,12 @@ import com.qualcomm.robotcore.exception.RobotCoreException;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.modules.Intake;
 import org.firstinspires.ftc.teamcode.modules.Movement;
 import org.firstinspires.ftc.teamcode.modules.Slide;
+import org.firstinspires.ftc.teamcode.modules.TouchSensorModule;
+import org.firstinspires.ftc.teamcode.modules.Turret;
+
 @TeleOp(name = "MainTelop")
 public class Teleop extends LinearOpMode {
     double baseSpeed = 0.85;
@@ -33,7 +37,10 @@ public class Teleop extends LinearOpMode {
         Gamepad prevGamepad = new Gamepad();
 
         movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, true);
-        Slide slide = new Slide("slideL", "slideR", "leftWheel", "rightWheel", "open", "turret", "touchSensor", this);
+        Slide slide = new Slide("slideL", "slideR", this);
+        Turret turret = new Turret("turret", this);
+        Intake intake = new Intake("leftWheel", "rightWheel", "open", this);
+        TouchSensorModule touchSensor = new TouchSensorModule("touchSensor", this);
         movement.telOpRunMode();
         SlideMode slideMode = SlideMode.auto;
         boolean closed = false;
@@ -85,34 +92,34 @@ public class Teleop extends LinearOpMode {
             }
             if (curGamepad.x && /*t.seconds() >= btnDelay && */!prevGamepad.x) {
                 if (closed) {
-                    slide.open();
+                    intake.open();
                     closed = false;
                 } else {
-                    slide.close();
+                    intake.close();
                     closed = true;
                 }
                 t.reset();
             }
             if (curGamepad.left_bumper) {
                 //if (slide.getSlidePosiion() > 400) {
-                    slide.spinTurret(-0.7);
+                turret.spinTurret(-0.7);
                 //}
             } else if (curGamepad.right_bumper) {
                 //if (slide.getSlidePosiion() > 400) {
-                    slide.spinTurret(0.7);
+                turret.spinTurret(0.7);
                 //}
-            } else if(!slide.isTurretBusy()) {
-                slide.spinTurret(0);
+            } else if(!turret.isBusy()) {
+                turret.spinTurret(0);
             }
             if(curGamepad.b && /*t.seconds() > btnDelay && */!prevGamepad.b){
                 switch (intakeState){
                     case intake:
-                        slide.stopIntake();
+                        intake.stopIntake();
                         intakeState = IntakeState.stop;
                         break;
                     default:
                     case stop:
-                        slide.startIntake();
+                        intake.startIntake();
                         intakeState = IntakeState.intake;
                         break;
                 }
@@ -121,12 +128,12 @@ public class Teleop extends LinearOpMode {
             if(curGamepad.a){
                 slide.gotoOther(slide.getSlidePosition()-200);
                 movement.delay(0.25);
-                slide.open();
+                intake.open();
                 movement.delay(0.25);
                 slide.gotoOther(slide.getSlidePosition()+200);
                 movement.delay(0.25);
-                slide.spinTurretWait(0.6,0);
-                slide.resetTurretEncoder();
+                turret.spinTurretWait(0.6,0);
+                turret.resetEncoder();
                 slide.goToPos(Slide.height.ground);
                 //slide.resetTurretEncoder();
             }
@@ -138,8 +145,8 @@ public class Teleop extends LinearOpMode {
                 }
                 t.reset();
             }
-            if (slide.touchSensorPressed() && !sensorState && !(slide.getSlidePosition() > 250)) {
-                slide.stopIntake();
+            if (touchSensor.getState() && !sensorState && !(slide.getSlidePosition() > 250)) {
+                intake.stopIntake();
                 movement.delayUpdateMovement(0.1);
                 slide.gotoOther(200);
                 intakeState = IntakeState.stop;
@@ -148,20 +155,20 @@ public class Teleop extends LinearOpMode {
                 slide.resetSlideEncoders();
             }
             if(curGamepad.y){
-                slide.stopIntake();
+                intake.stopIntake();
                 movement.delayUpdateMovement(0.1);
                 slide.gotoOther(200);
                 intakeState = IntakeState.stop;
             }
             if(curGamepad.left_trigger > 0.5 && t.seconds() >= btnDelay){
-                slide.spinTurret(slide.turretPower, -400);
+                turret.spinTurret(turret.turretPower, -400);
             }
             if(curGamepad.right_trigger > 0.5 && t.seconds() >= btnDelay){
-                slide.spinTurret(slide.turretPower, 400);
+                turret.spinTurret(turret.turretPower, 400);
             }
-            sensorState = slide.touchSensorPressed();
+            sensorState = touchSensor.getState();
             telemetry.addData("slideMode", slideMode);
-            telemetry.addData("turretPosition", slide.getTurretPosition());
+            telemetry.addData("turretPosition", turret.getPosition());
             telemetry.addData("slideHeight", slide.getSlidePosition());
             telemetry.addData("slideHeightLeft", slide.getSlidePosition(0));
             telemetry.addData("slideHeightRight", slide.getSlidePosition(1));

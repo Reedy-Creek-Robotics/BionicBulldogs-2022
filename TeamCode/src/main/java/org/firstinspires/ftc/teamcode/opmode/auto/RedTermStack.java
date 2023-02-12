@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.modules.Slide;
 @Disabled
 public class RedTermStack extends AutoBase {
     public void move(){
-        slide.close();
+        intake.close();
         movement.strafeRight(61-15.2);
         movement.moveStraight(102);
         telemetry.addLine("slide");
@@ -18,13 +18,13 @@ public class RedTermStack extends AutoBase {
         telemetry.addLine("turret");
         telemetry.update();
         movement.delay(1.25);
-        slide.spinTurretWait(0.4, -550);
+        turret.spinTurretWait(0.4, -550);
         movement.strafeRight(3);
         movement.delay(2);
-        slide.open();
+        intake.open();
         movement.delay(0.1);
         movement.strafeLeft(3);
-        slide.spinTurretWait(0.4, 0);
+        turret.spinTurretWait(0.4, 0);
         slide.goToPosWait(Slide.height.ground);
         if(cone == 3) return;
         movement.moveStraight(-31.5);
