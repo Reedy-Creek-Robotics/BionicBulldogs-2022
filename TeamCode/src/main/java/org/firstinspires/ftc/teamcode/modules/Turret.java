@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class Turret {
-    public double turretPower = 0.3;
+    public double turretPower = 0.4;
     SpinMotor turret;
     LinearOpMode opMode;
     public Turret(String turretName, LinearOpMode op){
@@ -19,6 +19,9 @@ public class Turret {
         resetTurret();
         while(turret.isBusy() && opMode.opModeIsActive()){
             //do nothing :)
+        }
+        if(turret.getPosition() < 10 && turret.getPosition() > -10){
+            resetTurret();
         }
     }
     public void spinTurretWait(double power, int position){

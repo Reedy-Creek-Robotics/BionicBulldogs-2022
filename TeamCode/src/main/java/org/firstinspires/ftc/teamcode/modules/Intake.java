@@ -10,6 +10,7 @@ public class Intake {
     LinearOpMode opMode;
     public double intakePower = 1;
     double openPos = -0.25;
+    double closePos = 0.1;
     ElapsedTime t;
     public Intake(String wheell, String wheelr, String opens, LinearOpMode op){
         wheelL = new SpinCrServo(wheell,op);
@@ -35,7 +36,7 @@ public class Intake {
         open.startSpin(openPos);
     }
     public void close(){
-        open.stopSpin();
+        open.startSpin(closePos);
     }
     public void intakeForTime(double time){
         t.reset();

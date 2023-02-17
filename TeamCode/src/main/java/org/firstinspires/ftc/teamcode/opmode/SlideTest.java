@@ -21,7 +21,7 @@ public class SlideTest extends LinearOpMode {
         ElapsedTime t = new ElapsedTime();
         t.reset();
         Slide.height height = Slide.height.ground;
-        Slide slide = new Slide("slideL", "slideR", this);
+        Slide slide = new Slide("slideL", "slideR", "slideSensor", this);
         Turret turret = new Turret("turret", this);
         Intake intake = new Intake("leftWheel", "rightWheel", "open", this);
         TouchSensorModule touchSensor = new TouchSensorModule("touchSensor", this);

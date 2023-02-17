@@ -23,7 +23,7 @@ public class Movement {
     //wheel size is 96mm and circumference~30.15 cm(Strafer chassis)
     public static double TICKS_PER_CM = 17.83; // 17.83 tics/cm traveled(Strafer)
     public static double MOVE_CORRECTION = 0.955;
-    public static double ROTATION_CORRECTION = 0.88; //(62/90);
+    public static double ROTATION_CORRECTION = 0.88 * 0.98; //(62/90);
     public static double STRAFE_CORRECTION = 1.1;
     public static double TURN_CONSTANT = 50.5d/90d; // distance per deg
     double slowdownOffset = 0.2;
@@ -32,9 +32,10 @@ public class Movement {
     Telemetry telemetry;
     DistanceSensorModule distanceSensor;
     IMU imu;
+    boolean accelerate = true;
     boolean useImu = false;
     double speed = .5;// default speed is always 50%
-    Slide slide;
+    TouchSensorModule touchSensor;
 
     public Movement(String fl, String fr, String bl, String br, LinearOpMode op, boolean _useImu){
         opMode = op;
@@ -101,8 +102,8 @@ public class Movement {
     public double getAngle(){
         return getAngle(AngleUnit.RADIANS);
     }
-    public void addSlide(Slide _slide){
-        slide = _slide;
+    public void addSlide(TouchSensorModule _sensor){
+        touchSensor = _sensor;
     }
 
     public void telOpRunMode(){
@@ -137,7 +138,9 @@ public class Movement {
             backRight.setPower(drive + strafe - rotate);
         }
     }
-
+    public void setAccelerate(boolean a){
+        accelerate = a;
+    }
     public void tankTeleOpUpdate(double wheelsPowerFactor){
         double output_x = Math.pow(opMode.gamepad1.left_stick_x, 3);
         double output_y = Math.pow(opMode.gamepad1.left_stick_y, 3);
@@ -268,7 +271,7 @@ public class Movement {
         backRight.setPower(speed);
         ElapsedTime time = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
         time.reset();
-        while (!slide.touchSensorPressed()){
+        while (!touchSensor.getState()){
         }
 
         frontLeft.setPower(0);
@@ -288,18 +291,19 @@ public class Movement {
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        frontLeft.setPower(speed);
-        backLeft.setPower(speed);
-        frontRight.setPower(speed);
-        backRight.setPower(speed);
-
         while (!opMode.isStopRequested() && (backRight.isBusy() && backLeft.isBusy() && frontLeft.isBusy() && frontRight.isBusy())){
             //do nothing :/
-            telemetry.addData("fl", backLeft.getCurrentPosition());
-            telemetry.addData("fr", backLeft.getCurrentPosition());
-            telemetry.addData("bl", backLeft.getCurrentPosition());
-            telemetry.addData("br", backLeft.getCurrentPosition());
-            telemetry.update();
+
+            double power = speed;
+
+            if(accelerate){
+                power = rampPower();
+            }
+
+            frontLeft.setPower(power);
+            backLeft.setPower(power);
+            frontRight.setPower(power);
+            backRight.setPower(power);
         }
         delay(0.25);
         frontLeft.setPower(0);
@@ -308,6 +312,28 @@ public class Movement {
         backRight.setPower(0);
 
     }
+
+    double rampPower(){
+        double fl = Math.abs((frontLeft.getCurrentPosition() - frontLeft.getTargetPosition()) / (double)frontLeft.getTargetPosition());
+        double fr = Math.abs((frontRight.getCurrentPosition() - frontRight.getTargetPosition()) / (double)frontRight.getTargetPosition());
+        double bl = Math.abs((backLeft.getCurrentPosition() - backLeft.getTargetPosition()) / (double)backLeft.getTargetPosition());
+        double br = Math.abs((backRight.getCurrentPosition() - backRight.getTargetPosition()) / (double)backRight.getTargetPosition());
+
+        double x = (fl + fr + bl + br) / 4;
+
+        double power = Math.min(-Math.pow(4 * x - 2, 2) + 4.5, 1) * speed;
+
+        telemetry.addData("fl", fl);
+        telemetry.addData("fr", fr);
+        telemetry.addData("bl", bl);
+        telemetry.addData("br", br);
+        telemetry.addData("x", x);
+        telemetry.addData("power", power);
+        telemetry.update();
+
+        return power;
+    }
+
     public void telemetryUpdate(){
         telemetry.addData("encoder-bck-left", backLeft.getCurrentPosition() + " power= " + backLeft.getPower() +  "  busy=" + backLeft.isBusy());
         telemetry.addData("encoder-bck-right", backRight.getCurrentPosition() + " power= " + backRight.getPower() +  "  busy=" + backRight.isBusy());

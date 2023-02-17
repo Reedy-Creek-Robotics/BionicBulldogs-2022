@@ -15,10 +15,10 @@ import org.firstinspires.ftc.teamcode.modules.TouchSensorModule;
 import org.firstinspires.ftc.teamcode.modules.Turret;
 
 @TeleOp(name = "MainTelop")
-public class Teleop extends LinearOpMode {
-    double baseSpeed = 0.85;
-    double medSpeed = 0.5;
-    double highSpeed = 0.3;
+public class Teleop extends LinearOpMode { //speed robot goes depending on slide height
+    double baseSpeed = 0.85; //speed 1
+    double medSpeed = 0.5; // speed 2
+    double highSpeed = 0.3; // speed 3
 
     double btnDelay = 0;
 
@@ -36,15 +36,18 @@ public class Teleop extends LinearOpMode {
         Gamepad curGamepad = new Gamepad();
         Gamepad prevGamepad = new Gamepad();
 
-        movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, true);
-        Slide slide = new Slide("slideL", "slideR", this);
+        movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, false);
+        //Movement that robot goes through
+        Slide slide = new Slide("slideL", "slideR", "slideSensor", this);
         Turret turret = new Turret("turret", this);
         Intake intake = new Intake("leftWheel", "rightWheel", "open", this);
         TouchSensorModule touchSensor = new TouchSensorModule("touchSensor", this);
+        // The touch sensor on our robot
         movement.telOpRunMode();
         SlideMode slideMode = SlideMode.auto;
         boolean closed = false;
         boolean holdPosition = false;
+        boolean slideEncoderReset = false;
         ElapsedTime t = new ElapsedTime();
         t.reset();
         IntakeState intakeState = IntakeState.stop;
@@ -127,13 +130,13 @@ public class Teleop extends LinearOpMode {
             }
             if(curGamepad.a){
                 slide.gotoOther(slide.getSlidePosition()-200);
-                movement.delay(0.25);
+                movement.delayUpdateMovement(0.25);
                 intake.open();
-                movement.delay(0.25);
+                movement.delayUpdateMovement(0.25);
                 slide.gotoOther(slide.getSlidePosition()+200);
-                movement.delay(0.25);
-                turret.spinTurretWait(0.6,0);
-                turret.resetEncoder();
+                movement.delayUpdateMovement(0.25);
+                turret.resetTurretWait();
+                movement.delayUpdateMovement(0.5);
                 slide.goToPos(Slide.height.ground);
                 //slide.resetTurretEncoder();
             }
@@ -166,7 +169,16 @@ public class Teleop extends LinearOpMode {
             if(curGamepad.right_trigger > 0.5 && t.seconds() >= btnDelay){
                 turret.spinTurret(turret.turretPower, 400);
             }
+
+            if((slide.getSlidePosition() > -10 && slide.getSlidePosition() < 10) && !slideEncoderReset){
+                slide.resetSlideEncoders();
+                slideEncoderReset = true;
+            }else{
+                slideEncoderReset = false;
+            }
+            slide.isMoving();
             sensorState = touchSensor.getState();
+            // Adds telemetry that we can see during telop
             telemetry.addData("slideMode", slideMode);
             telemetry.addData("turretPosition", turret.getPosition());
             telemetry.addData("slideHeight", slide.getSlidePosition());

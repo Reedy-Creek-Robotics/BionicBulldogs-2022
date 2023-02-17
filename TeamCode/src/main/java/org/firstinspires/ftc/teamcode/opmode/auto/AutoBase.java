@@ -25,13 +25,13 @@ public abstract class AutoBase extends LinearOpMode {
     public abstract void move();
     public void runOpMode(){
         telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
-        slide = new Slide("slideL", "slideR", this);
+        slide = new Slide("slideL", "slideR", "slideSensor", this);
         turret = new Turret("turret", this);
         intake = new Intake("leftWheel", "rightWheel", "open", this);
         touchSensor = new TouchSensorModule("touchSensor", this);
         movement = new Movement("frontLeft", "frontRight", "backLeft", "backRight", this, false);
         movement.setSpeed(deafultSpeed);
-        movement.addSlide(slide);
+        movement.addSlide(touchSensor);
         Recoginition recoginition = new Recoginition(this);
         while(opModeInInit()){
             recoginition.update();

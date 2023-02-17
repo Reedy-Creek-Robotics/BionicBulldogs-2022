@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Slide {
     int lowPos = 1300;
-    int[] stackPos = {0,0,150,300,400};
+    int[] stackPos = {0,100,200,300,400};
     int medPos = 2092;
     int highPos = 3000;
     public double slidePower = 1;
@@ -13,11 +13,13 @@ public class Slide {
     public enum height{ground,low, med, high, stack3, stack4, stack5};
     SpinMotor slideL;
     SpinMotor slideR;
+    TouchSensorModule touchSensor;
     LinearOpMode opMode;
     public height currentHight = height.ground;
-    public Slide(String slidel, String slider, LinearOpMode op){
+    public Slide(String slidel, String slider, String Sensor, LinearOpMode op){
         slideL = new SpinMotor(slidel,true,op);
         slideR = new SpinMotor(slider,true,op);
+        touchSensor = new TouchSensorModule(Sensor, op);
         slideL.reverse();
         opMode = op;
     }
@@ -25,8 +27,8 @@ public class Slide {
         currentHight = pos;
         switch (pos) {
             case ground:
-                slideR.spinToPosition(slidePower,-10);
-                slideL.spinToPosition(slidePower,-10);
+                slideR.spinToPosition(slidePower,0);
+                slideL.spinToPosition(slidePower,0);
                 break;
             case low:
                 slideR.spinToPosition(slidePower,lowPos);
@@ -53,10 +55,18 @@ public class Slide {
                 break;
         }
     }
+    public void isMoving(){
+        if((slideL.isBusy() || slideR.isBusy()) && touchSensor.getState()) {
+            slideL.stopSpin();
+            slideR.stopSpin();
+            slideL.resetEncoder();
+            slideR.resetEncoder();
+        }
+    }
     public void goToPosWait(height pos){
         goToPos(pos);
         while(!atPosition(pos)){
-
+            isMoving();
         }
     }
     public int getValueForHeight(height pos){
