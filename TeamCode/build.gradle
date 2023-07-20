@@ -29,5 +29,7 @@ dependencies {
     implementation 'org.openftc:i2cdrivers:1.0.0'
     implementation 'org.openftc:easyopencv:1.5.2'
     implementation 'org.openftc:apriltag:1.1.0'
+    implementation 'org.ftclib.ftclib:core:2.1.1'
+    implementation 'org.ftclib.ftclib:vision:2.1.0'
 }
 
