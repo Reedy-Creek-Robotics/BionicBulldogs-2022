@@ -30,9 +30,9 @@ public class TriangleDrive extends LinearOpMode {
             double strafe = gamepad1.right_stick_x;
             float turn = gamepad1.left_stick_x;
 
-            fl.setPower((forward + turn) * 0.5);
-            fr.setPower((-forward + turn) * 0.5);
-            b.setPower(turn * 0.5);
+            fl.setPower((forward + turn));
+            fr.setPower((-forward + turn));
+            b.setPower(turn);
         }
     }
 }
