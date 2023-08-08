@@ -7,7 +7,7 @@ public class Slide {
     int lowPos = 1300;
     int[] stackPos = {0,100,200,300,400};
     int medPos = 2092;
-    int highPos = 3000;
+    int highPos = 2850;
     public double slidePower = 1;
     float offset = 20;
     public enum height{ground,low, med, high, stack3, stack4, stack5};
@@ -86,7 +86,7 @@ public class Slide {
         return(slideL.getPosition() > getValueForHeight(pos) - offset &&
                 slideL.getPosition() < getValueForHeight(pos) + offset &&
                 slideR.getPosition() > getValueForHeight(pos) - offset &&
-                slideR.getPosition() < getValueForHeight(pos) + offset);
+                slideR.getPosition() < getValueForHeight(pos) + offset && !opMode.isStopRequested());
     }
 
     public int getSlidePosition(){

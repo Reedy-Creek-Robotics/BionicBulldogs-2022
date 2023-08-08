@@ -15,10 +15,9 @@ public class BlueTerm3ConeCycle extends AutoBase{
         movement.moveStraight(142.2); //moves the robot the first position and leaves cone there
         movement.setAccelerate(false);
         movement.setSpeed(0.6);
-        movement.moveStraight(-33.5);// goes back to score
+        movement.moveStraight(-32.5);// goes back to score
         movement.setSpeed(0.4);
         //score
-
         slide.goToPos(Slide.height.med); // slides goes to medium
         movement.strafeLeft(16); // the robot strafes left
         movement.setSpeed(0.7);

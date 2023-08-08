@@ -23,6 +23,9 @@ public abstract class AutoBase extends LinearOpMode {
     final double deafultSpeed = 0.7;
     boolean resetRobot = true;
     public abstract void move();
+    public void initalize(){
+
+    }
     public void runOpMode(){
         telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
         slide = new Slide("slideL", "slideR", "slideSensor", this);
@@ -33,6 +36,7 @@ public abstract class AutoBase extends LinearOpMode {
         movement.setSpeed(deafultSpeed);
         movement.addSlide(touchSensor);
         Recoginition recoginition = new Recoginition(this);
+        initalize();
         while(opModeInInit()){
             recoginition.update();
             sleep(20);

@@ -14,11 +14,35 @@ import org.firstinspires.ftc.teamcode.modules.Slide;
 import org.firstinspires.ftc.teamcode.modules.TouchSensorModule;
 import org.firstinspires.ftc.teamcode.modules.Turret;
 
+/*controls
+    sticks: driving
+    share: switch slide mode
+    x, square: intake open/close
+    a, x: score
+    b, circle: intake/stop intake
+    y, triangle: manual lift slide
+    options: turret 180
+
+    back: change slide mode auto/manual
+
+    auto:
+    dpad down: slides ground
+    dpad left: slides low
+    dpad up: slides med
+    dpad right: slides high
+
+    manual:
+    dpad up: move slides up
+    dpad down: move slides down
+ */
+
+
+
 @TeleOp(name = "MainTelop")
 public class Teleop extends LinearOpMode { //speed robot goes depending on slide height
-    double baseSpeed = 0.85; //speed 1
-    double medSpeed = 0.5; // speed 2
-    double highSpeed = 0.3; // speed 3
+    double baseSpeed = 0.85/2; //speed 1
+    double medSpeed = 0.5/2; // speed 2
+    double highSpeed = 0.3/2; // speed 3
 
     double btnDelay = 0;
 
@@ -138,6 +162,7 @@ public class Teleop extends LinearOpMode { //speed robot goes depending on slide
                 turret.resetTurretWait();
                 movement.delayUpdateMovement(0.5);
                 slide.goToPos(Slide.height.ground);
+                closed = false;
                 //slide.resetTurretEncoder();
             }
             if(curGamepad.back && t.seconds() >= btnDelay && !prevGamepad.back){
@@ -176,6 +201,11 @@ public class Teleop extends LinearOpMode { //speed robot goes depending on slide
             }else{
                 slideEncoderReset = false;
             }
+
+            if(curGamepad.options){
+                turret.spinTurret(turret.turretPower, 800);
+            }
+
             slide.isMoving();
             sensorState = touchSensor.getState();
             // Adds telemetry that we can see during telop
